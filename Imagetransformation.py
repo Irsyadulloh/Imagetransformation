@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image, ImageOps
 import numpy as np
+import io
 
 # Function to rotate the image
 def rotate_image(img, angle):
@@ -22,6 +23,13 @@ def translate_image(img, x_offset, y_offset):
     translated_img = Image.fromarray(translated_array)
 
     return translated_img
+
+# Function to save an image to a BytesIO object for downloading
+def save_image_for_download(img):
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes.seek(0)
+    return img_bytes
 
 # Streamlit interface
 st.title('Image Transformation with Streamlit')
@@ -51,3 +59,13 @@ if uploaded_file is not None:
     st.image(rotated_image, caption=f"Rotated by {rotate_angle}°", use_column_width=True)
     st.image(scaled_image, caption=f"Scaled by a factor of {scale_factor}", use_column_width=True)
     st.image(translated_image, caption=f"Translated by X: {x_offset}, Y: {y_offset}", use_column_width=True)
+
+    # Provide download buttons for each transformed image
+    rotated_img_bytes = save_image_for_download(rotated_image)
+    st.download_button("Download Rotated Image", rotated_img_bytes, "rotated_image.png", "image/png")
+
+    scaled_img_bytes = save_image_for_download(scaled_image)
+    st.download_button("Download Scaled Image", scaled_img_bytes, "scaled_image.png", "image/png")
+
+    translated_img_bytes = save_image_for_download(translated_image)
+    st.download_button("Download Translated Image", translated_img_bytes, "translated_image.png", "image/png")
