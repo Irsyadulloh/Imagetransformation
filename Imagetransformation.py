@@ -13,7 +13,9 @@ def scale_image(img, scale_factor):
 
 # Function to translate the image (apply offset)
 def translate_image(img, x_offset, y_offset):
-    return ImageOps.offset(img, x_offset, y_offset)
+    # Convert image to RGB before applying offset
+    img_rgb = img.convert("RGB")
+    return ImageOps.offset(img_rgb, x_offset, y_offset)
 
 # Streamlit interface
 st.title('Image Transformation with Streamlit')
