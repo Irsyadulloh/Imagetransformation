@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 import numpy as np
 import io
 
@@ -24,6 +24,11 @@ def translate_image(img, x_offset, y_offset):
 
     return translated_img
 
+# Function to adjust the brightness of the image
+def adjust_brightness(img, brightness_factor):
+    enhancer = ImageEnhance.Brightness(img)
+    return enhancer.enhance(brightness_factor)
+
 # Function to save an image to a BytesIO object for downloading
 def save_image_for_download(img):
     img_bytes = io.BytesIO()
@@ -44,16 +49,23 @@ if uploaded_file is not None:
     # Show original image
     st.image(img, caption="Original Image", use_column_width=True)
 
-    # Add sliders for transformation
+    # Add the brightness slider as the first configuration
+    brightness_factor = st.slider("Brightness", min_value=0.1, max_value=3.0, step=0.1, value=1.0)
+
+    # Apply brightness adjustment first
+    brightened_image = adjust_brightness(img, brightness_factor)
+    st.image(brightened_image, caption=f"Brightness: {brightness_factor}", use_column_width=True)
+
+    # Add sliders for the other transformations
     rotate_angle = st.slider("Rotation Angle", min_value=0, max_value=360, step=1, value=0)
     scale_factor = st.slider("Scale Factor", min_value=0.1, max_value=2.0, step=0.1, value=1.0)
     x_offset = st.slider("Translation X Offset", min_value=-100, max_value=100, step=1, value=0)
     y_offset = st.slider("Translation Y Offset", min_value=-100, max_value=100, step=1, value=0)
 
     # Apply transformations
-    rotated_image = rotate_image(img, rotate_angle)
-    scaled_image = scale_image(img, scale_factor)
-    translated_image = translate_image(img, x_offset, y_offset)
+    rotated_image = rotate_image(brightened_image, rotate_angle)
+    scaled_image = scale_image(brightened_image, scale_factor)
+    translated_image = translate_image(brightened_image, x_offset, y_offset)
 
     # Show transformed images
     st.image(rotated_image, caption=f"Rotated by {rotate_angle}°", use_column_width=True)
@@ -61,6 +73,9 @@ if uploaded_file is not None:
     st.image(translated_image, caption=f"Translated by X: {x_offset}, Y: {y_offset}", use_column_width=True)
 
     # Provide download buttons for each transformed image
+    brightened_img_bytes = save_image_for_download(brightened_image)
+    st.download_button("Download Brightened Image", brightened_img_bytes, "brightened_image.png", "image/png")
+
     rotated_img_bytes = save_image_for_download(rotated_image)
     st.download_button("Download Rotated Image", rotated_img_bytes, "rotated_image.png", "image/png")
 
