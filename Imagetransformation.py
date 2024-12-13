@@ -11,11 +11,17 @@ def scale_image(img, scale_factor):
     new_size = (int(img.width * scale_factor), int(img.height * scale_factor))
     return img.resize(new_size)
 
-# Function to translate the image (apply offset)
+# Function to translate the image (apply offset) manually using numpy
 def translate_image(img, x_offset, y_offset):
-    # Convert image to RGB before applying offset
-    img_rgb = img.convert("RGB")
-    return ImageOps.offset(img_rgb, x_offset, y_offset)
+    img_array = np.array(img)  # Convert the image to a numpy array
+
+    # Apply translation by shifting the array
+    translated_array = np.roll(img_array, shift=(y_offset, x_offset), axis=(0, 1))
+
+    # Convert the numpy array back to an image
+    translated_img = Image.fromarray(translated_array)
+
+    return translated_img
 
 # Streamlit interface
 st.title('Image Transformation with Streamlit')
